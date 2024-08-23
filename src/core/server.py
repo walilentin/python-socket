@@ -6,7 +6,7 @@ from src.core.http_utils import generate_response
 def run():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('localhost', 7999))
+    server_socket.bind(('localhost', 3000))
     server_socket.listen()
 
     while True:
