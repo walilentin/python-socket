@@ -1,4 +1,6 @@
 import urllib.parse
+
+from src.core.http_router import router
 from src.core.routers import index, blog, me, submit_form
 
 URLS = {
@@ -29,12 +31,10 @@ def parse_body(request):
 
 def generate_headers(method, url):
     if method not in METHODS:
-        return ('HTTP/1.1 405 Method not allowed\n\n', 405)
-
-    if not url in URLS:
-        return ('HTTP/1.1 404 Not found\n\n', 404)
-
-    return ('HTTP/1.1 200 OK\n\n', 200)
+        return 'HTTP/1.1 405 Method Not Allowed\n\n', 405
+    if (method, url) not in router.routes:
+        return 'HTTP/1.1 404 Not Found\n\n', 404
+    return 'HTTP/1.1 200 OK\n\n', 200
 
 
 def generate_content(status_code, url, method='GET', body=None):
@@ -43,10 +43,8 @@ def generate_content(status_code, url, method='GET', body=None):
     if status_code == 405:
         return '<h1>405</h1><p>Method not allowed</p>'
 
-    if method == 'POST' and url == '/submit-form':
-        return f"<h1>Form submitted successfully!</h1><p>Received data: {body}</p>"
-
     if url in URLS:
+        print(url)
         return URLS[url]()
 
     return '<h1>404</h1><p>Not found</p>'
@@ -55,8 +53,16 @@ def generate_content(status_code, url, method='GET', body=None):
 def generate_response(request):
     method, url = parse_request(request)
     headers, status_code = generate_headers(method, url)
-    body = parse_body(request)
-    response_body = generate_content(status_code, url, method, body)
-    print(f"Request Method: {method}, URL: {url}")
-    print(f"Request Body: {body}")
+
+    handler = router.routes.get((method, url))
+
+    if handler:
+        if method == 'POST':
+            body = parse_body(request)
+            response_body = handler(body)
+        else:
+            response_body = handler()
+    else:
+        response_body = '<h1>404</h1><p>Not found</p>'
+
     return (headers + response_body).encode()

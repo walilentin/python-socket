@@ -1,14 +1,13 @@
 from src.core.http_router import router
 
-
 @router.get('/')
 def index():
     with open('src/templates/index.html') as template:
         return template.read()
 
 @router.post('/submit-form')
-def submit_form():
-    return "<h1>Form Submitted</h1>"
+def submit_form(body):
+    return str(body)
 
 @router.get('/me')
 def me():
