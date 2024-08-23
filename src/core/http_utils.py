@@ -1,6 +1,5 @@
 import urllib.parse
-
-from src.core.views import index, blog, me, submit_form
+from src.core.routers import index, blog, me, submit_form
 
 URLS = {
     '/': index,
@@ -9,7 +8,7 @@ URLS = {
     '/submit-form': submit_form,
 }
 
-METHODS = ['GET', 'POST']
+METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 
 
 def parse_request(request):  # parse request take info about method and url like this (GET HTTP/1.1\r\nHost: localhost:7999)
@@ -43,18 +42,21 @@ def generate_content(status_code, url, method='GET', body=None):
         return '<h1>404</h1><p>Not found</p>'
     if status_code == 405:
         return '<h1>405</h1><p>Method not allowed</p>'
-    if method == 'POST':
-        if url == '/submit-form':
-            return f"<h1>Form Submitted</h1><p>Received data: {body}</p>"
-    return URLS[url]()
+
+    if method == 'POST' and url == '/submit-form':
+        return f"<h1>Form submitted successfully!</h1><p>Received data: {body}</p>"
+
+    if url in URLS:
+        return URLS[url]()
+
+    return '<h1>404</h1><p>Not found</p>'
 
 
-def generate_response(request, body=None):
+def generate_response(request):
     method, url = parse_request(request)
     headers, status_code = generate_headers(method, url)
-    if method == 'POST':
-        body = parse_body(request)
-
-    content = generate_content(status_code, url, method, body)
-
-    return (headers + content).encode()
+    body = parse_body(request)
+    response_body = generate_content(status_code, url, method, body)
+    print(f"Request Method: {method}, URL: {url}")
+    print(f"Request Body: {body}")
+    return (headers + response_body).encode()
