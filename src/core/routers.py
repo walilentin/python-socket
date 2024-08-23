@@ -1,4 +1,7 @@
+import json
+
 from src.core.http_router import router
+
 
 @router.get('/')
 def index():
@@ -7,11 +10,11 @@ def index():
 
 @router.post('/submit-form')
 def submit_form(body):
-    return str(body)
+    return body
 
 @router.get('/me')
 def me():
-    return "<h1>ME</h1>"
+    return {'hello':'world'}
 
 @router.get('/blog')
 def blog():

@@ -1,3 +1,4 @@
+import json
 import urllib.parse
 
 from src.core.http_router import router
@@ -12,6 +13,9 @@ URLS = {
 
 METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 
+def json_response(data):
+    headers = 'HTTP/1.1 200 OK\nContent-Type: application/json\n\n'
+    return (headers + json.dumps(data)).encode()
 
 def parse_request(request):  # parse request take info about method and url like this (GET HTTP/1.1\r\nHost: localhost:7999)
     parsed = request.split(' ')
@@ -37,7 +41,7 @@ def generate_headers(method, url):
     return 'HTTP/1.1 200 OK\n\n', 200
 
 
-def generate_content(status_code, url, method='GET', body=None):
+def generate_content(status_code, url):
     if status_code == 404:
         return '<h1>404</h1><p>Not found</p>'
     if status_code == 405:
@@ -48,7 +52,6 @@ def generate_content(status_code, url, method='GET', body=None):
         return URLS[url]()
 
     return '<h1>404</h1><p>Not found</p>'
-
 
 def generate_response(request):
     method, url = parse_request(request)
@@ -62,7 +65,10 @@ def generate_response(request):
             response_body = handler(body)
         else:
             response_body = handler()
-    else:
-        response_body = '<h1>404</h1><p>Not found</p>'
 
-    return (headers + response_body).encode()
+        if isinstance(response_body, dict):
+            return json_response(response_body)
+        else:
+            return (headers + response_body).encode()
+    else:
+        return ('HTTP/1.1 404 Not Found\n\n<h1>404</h1><p>Not found</p>').encode()
