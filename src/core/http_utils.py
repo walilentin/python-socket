@@ -1,7 +1,4 @@
-import socket
-from views import *
-
-
+from src.core.views import index, blog, me
 
 URLS = {
     '/': index,
@@ -10,7 +7,7 @@ URLS = {
 }
 
 
-def parse_request(request):
+def parse_request(request): # parse request take info about method and url like this (GET HTTP/1.1\r\nHost: localhost:7999)
     parsed = request.split(' ')
     method = parsed[0]
     url = parsed[1]
@@ -42,27 +39,3 @@ def generate_response(request):
     body = generate_content(status_code, url)
 
     return (headers + body).encode()
-
-
-def run():
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(('localhost', 7999))
-    server_socket.listen()
-
-    while True:
-        client_socket, addr = server_socket.accept()
-        request = client_socket.recv(1024)
-        # print(request.decode('utf-8'))
-        print(request)
-        print('')
-        print(addr)
-
-        response = generate_response(request.decode('utf-8'))
-
-        client_socket.sendall(response)
-        client_socket.close()
-
-
-if __name__ == "__main__":
-    run()
