@@ -1,15 +1,7 @@
 import json
 import urllib.parse
+from src.main import main_router as router
 
-from src.core.http_router import router
-from src.core.routers import index, blog, me, submit_form
-
-URLS = {
-    '/': index,
-    '/blog': blog,
-    '/me': me,
-    '/submit-form': submit_form,
-}
 
 METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 
@@ -39,19 +31,6 @@ def generate_headers(method, url):
     if (method, url) not in router.routes:
         return 'HTTP/1.1 404 Not Found\n\n', 404
     return 'HTTP/1.1 200 OK\n\n', 200
-
-
-def generate_content(status_code, url):
-    if status_code == 404:
-        return '<h1>404</h1><p>Not found</p>'
-    if status_code == 405:
-        return '<h1>405</h1><p>Method not allowed</p>'
-
-    if url in URLS:
-        print(url)
-        return URLS[url]()
-
-    return '<h1>404</h1><p>Not found</p>'
 
 def generate_response(request):
     method, url = parse_request(request)

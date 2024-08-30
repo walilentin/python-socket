@@ -9,6 +9,9 @@ class Router:
 
         return decorator
 
+    def add_router(self, other_router):
+        self.routes.update(other_router.routes)
+
     def get(self, path):
         return self.add_route('GET', path)
 
@@ -20,5 +23,3 @@ class Router:
 
     def delete(self, path):
         return self.add_route('DELETE', path)
-
-router = Router()
